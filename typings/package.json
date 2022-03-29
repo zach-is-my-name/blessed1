@@ -1,0 +1,52 @@
+{
+    "name": "@types/blessed",
+    "version": "0.1.19",
+    "description": "TypeScript definitions for blessed",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/blessed",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Bryn Austin Bellomy",
+            "url": "https://github.com/brynbellomy",
+            "githubUsername": "brynbellomy"
+        },
+        {
+            "name": "Steve Kellock",
+            "url": "https://github.com/skellock",
+            "githubUsername": "skellock"
+        },
+        {
+            "name": "Max Brauer",
+            "url": "https://github.com/mamachanko",
+            "githubUsername": "mamachanko"
+        },
+        {
+            "name": "Nathan Rajlich",
+            "url": "https://github.com/TooTallNate",
+            "githubUsername": "TooTallNate"
+        },
+        {
+            "name": "Daniel Berlanga",
+            "url": "https://github.com/danikaze",
+            "githubUsername": "danikaze"
+        },
+        {
+            "name": "Jeff Huijsmans",
+            "url": "https://github.com/jeffhuys",
+            "githubUsername": "jeffhuys"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/blessed"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*"
+    },
+    "typesPublisherContentHash": "0a4e29f079af94accf095698a498b021d8afe24572b65762c6866e257658b91e",
+    "typeScriptVersion": "3.6"
+}
