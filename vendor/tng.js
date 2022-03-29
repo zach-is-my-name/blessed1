@@ -4,33 +4,30 @@
  * https://github.com/chjj/tng
  */
 
-var fs = require('fs')
-  , util = require('util')
-  , path = require('path')
-  , zlib = require('zlib')
-  , assert = require('assert')
-  , cp = require('child_process')
-  , exec = cp.execFileSync;
+var fs = require("fs"),
+  util = require("util"),
+  path = require("path"),
+  zlib = require("zlib"),
+  assert = require("assert"),
+  cp = require("child_process"),
+  exec = cp.execFileSync;
 
 /**
  * PNG
  */
 
 function PNG(file, options) {
-  var buf
-    , chunks
-    , idat
-    , pixels;
+  var buf, chunks, idat, pixels;
 
   if (!(this instanceof PNG)) {
     return new PNG(file, options);
   }
 
-  if (!file) throw new Error('no file');
+  if (!file) throw new Error("no file");
 
   this.options = options || {};
-  this.colors = options.colors || require('blessed/lib/colors');
-  this.optimization = this.options.optimization || 'mem';
+  this.colors = options.colors || require("blessed/lib/colors");
+  this.optimization = this.options.optimization || "mem";
   this.speed = this.options.speed || 1;
 
   if (Buffer.isBuffer(file)) {
@@ -42,12 +39,16 @@ function PNG(file, options) {
     buf = fs.readFileSync(this.file);
   }
 
-  this.format = buf.readUInt32BE(0) === 0x89504e47 ? 'png'
-    : buf.slice(0, 3).toString('ascii') === 'GIF' ? 'gif'
-    : buf.readUInt16BE(0) === 0xffd8 ? 'jpg'
-    : path.extname(this.file).slice(1).toLowerCase() || 'png';
+  this.format =
+    buf.readUInt32BE(0) === 0x89504e47
+      ? "png"
+      : buf.slice(0, 3).toString("ascii") === "GIF"
+      ? "gif"
+      : buf.readUInt16BE(0) === 0xffd8
+      ? "jpg"
+      : path.extname(this.file).slice(1).toLowerCase() || "png";
 
-  if (this.format !== 'png') {
+  if (this.format !== "png") {
     try {
       return this.toPNG(buf);
     } catch (e) {
@@ -64,28 +65,27 @@ function PNG(file, options) {
   this.frames = this.compileFrames(this.frames);
 }
 
-PNG.prototype.parseRaw = function(buf) {
-  var chunks = []
-    , index = 0
-    , i = 0
-    , buf
-    , len
-    , type
-    , name
-    , data
-    , crc
-    , check
-    , critical
-    , public_
-    , conforming
-    , copysafe
-    , pos;
+PNG.prototype.parseRaw = function (buf) {
+  var chunks = [],
+    index = 0,
+    i = 0,
+    buf,
+    len,
+    type,
+    name,
+    data,
+    crc,
+    check,
+    critical,
+    public_,
+    conforming,
+    copysafe,
+    pos;
 
   this._debug(this.file);
 
-  if (buf.readUInt32BE(0) !== 0x89504e47
-      || buf.readUInt32BE(4) !== 0x0d0a1a0a) {
-    throw new Error('bad header');
+  if (buf.readUInt32BE(0) !== 0x89504e47 || buf.readUInt32BE(4) !== 0x0d0a1a0a) {
+    throw new Error("bad header");
   }
 
   i += 8;
@@ -96,7 +96,7 @@ PNG.prototype.parseRaw = function(buf) {
       i += 4;
       pos = i;
       type = buf.slice(i, i + 4);
-      name = type.toString('ascii');
+      name = type.toString("ascii");
       i += 4;
       data = buf.slice(i, i + len);
       i += len;
@@ -108,7 +108,7 @@ PNG.prototype.parseRaw = function(buf) {
       conforming = !!(~type[2] & 32);
       copysafe = !!(~type[3] & 32);
       if (crc !== check) {
-        throw new Error(name + ': bad crc');
+        throw new Error(name + ": bad crc");
       }
     } catch (e) {
       if (this.options.debug) throw e;
@@ -130,22 +130,16 @@ PNG.prototype.parseRaw = function(buf) {
         critical: critical,
         public_: public_,
         conforming: conforming,
-        copysafe: copysafe
-      }
+        copysafe: copysafe,
+      },
     });
   }
 
   return chunks;
 };
 
-PNG.prototype.parseChunks = function(chunks) {
-  var i
-    , chunk
-    , name
-    , data
-    , p
-    , idat
-    , info;
+PNG.prototype.parseChunks = function (chunks) {
+  var i, chunk, name, data, p, idat, info;
 
   for (i = 0; i < chunks.length; i++) {
     chunk = chunks[i];
@@ -153,7 +147,7 @@ PNG.prototype.parseChunks = function(chunks) {
     data = chunk.data;
     info = {};
     switch (name) {
-      case 'ihdr': {
+      case "ihdr": {
         this.width = info.width = data.readUInt32BE(0);
         this.height = info.height = data.readUInt32BE(4);
         this.bitDepth = info.bitDepth = data.readUInt8(8);
@@ -162,40 +156,65 @@ PNG.prototype.parseChunks = function(chunks) {
         this.filter = info.filter = data.readUInt8(11);
         this.interlace = info.interlace = data.readUInt8(12);
         switch (this.bitDepth) {
-          case 1: case 2: case 4: case 8: case 16: case 24: case 32: break;
-          default: throw new Error('bad bit depth: ' + this.bitDepth);
+          case 1:
+          case 2:
+          case 4:
+          case 8:
+          case 16:
+          case 24:
+          case 32:
+            break;
+          default:
+            throw new Error("bad bit depth: " + this.bitDepth);
         }
         switch (this.colorType) {
-          case 0: case 2: case 3: case 4: case 6: break;
-          default: throw new Error('bad color: ' + this.colorType);
+          case 0:
+          case 2:
+          case 3:
+          case 4:
+          case 6:
+            break;
+          default:
+            throw new Error("bad color: " + this.colorType);
         }
         switch (this.compression) {
-          case 0: break;
-          default: throw new Error('bad compression: ' + this.compression);
+          case 0:
+            break;
+          default:
+            throw new Error("bad compression: " + this.compression);
         }
         switch (this.filter) {
-          case 0: case 1: case 2: case 3: case 4: break;
-          default: throw new Error('bad filter: ' + this.filter);
+          case 0:
+          case 1:
+          case 2:
+          case 3:
+          case 4:
+            break;
+          default:
+            throw new Error("bad filter: " + this.filter);
         }
         switch (this.interlace) {
-          case 0: case 1: break;
-          default: throw new Error('bad interlace: ' + this.interlace);
+          case 0:
+          case 1:
+            break;
+          default:
+            throw new Error("bad interlace: " + this.interlace);
         }
         break;
       }
-      case 'plte': {
+      case "plte": {
         this.palette = info.palette = [];
         for (p = 0; p < data.length; p += 3) {
           this.palette.push({
             r: data[p + 0],
             g: data[p + 1],
             b: data[p + 2],
-            a: 255
+            a: 255,
           });
         }
         break;
       }
-      case 'idat': {
+      case "idat": {
         this.size = this.size || 0;
         this.size += data.length;
         this.idat = this.idat || [];
@@ -203,11 +222,11 @@ PNG.prototype.parseChunks = function(chunks) {
         info.size = data.length;
         break;
       }
-      case 'iend': {
+      case "iend": {
         this.end = true;
         break;
       }
-      case 'trns': {
+      case "trns": {
         this.alpha = info.alpha = Array.prototype.slice.call(data);
         if (this.palette) {
           for (p = 0; p < data.length; p++) {
@@ -218,14 +237,14 @@ PNG.prototype.parseChunks = function(chunks) {
         break;
       }
       // https://wiki.mozilla.org/APNG_Specification
-      case 'actl': {
+      case "actl": {
         this.actl = info = {};
         this.frames = [];
         this.actl.numFrames = data.readUInt32BE(0);
         this.actl.numPlays = data.readUInt32BE(4);
         break;
       }
-      case 'fctl': {
+      case "fctl": {
         // IDAT is the first frame depending on the order:
         // IDAT is a frame: acTL->fcTL->IDAT->[fcTL]->fdAT
         // IDAT is not a frame: acTL->IDAT->[fcTL]->fdAT
@@ -234,12 +253,12 @@ PNG.prototype.parseChunks = function(chunks) {
           this.frames.push({
             idat: true,
             fctl: info,
-            fdat: this.idat
+            fdat: this.idat,
           });
         } else {
           this.frames.push({
             fctl: info,
-            fdat: []
+            fdat: [],
           });
         }
         info.sequenceNumber = data.readUInt32BE(0);
@@ -253,7 +272,7 @@ PNG.prototype.parseChunks = function(chunks) {
         info.blendOp = data.readUInt8(25);
         break;
       }
-      case 'fdat': {
+      case "fdat": {
         info.sequenceNumber = data.readUInt32BE(0);
         info.data = data.slice(4);
         this.frames[this.frames.length - 1].fdat.push(info.data);
@@ -266,47 +285,53 @@ PNG.prototype.parseChunks = function(chunks) {
   this._debug(chunks);
 
   if (this.frames) {
-    this.frames = this.frames.map(function(frame, i) {
+    this.frames = this.frames.map(function (frame, i) {
       frame.fdat = this.decompress(frame.fdat);
-      if (!frame.fdat.length) throw new Error('no data');
+      if (!frame.fdat.length) throw new Error("no data");
       return frame;
     }, this);
   }
 
   idat = this.decompress(this.idat);
-  if (!idat.length) throw new Error('no data');
+  if (!idat.length) throw new Error("no data");
 
   return idat;
 };
 
-PNG.prototype.parseLines = function(data) {
-  var pixels = []
-    , x
-    , p
-    , prior
-    , line
-    , filter
-    , samples
-    , pendingSamples
-    , ch
-    , shiftStart
-    , i
-    , toShift
-    , sample;
+PNG.prototype.parseLines = function (data) {
+  var pixels = [],
+    x,
+    p,
+    prior,
+    line,
+    filter,
+    samples,
+    pendingSamples,
+    ch,
+    shiftStart,
+    i,
+    toShift,
+    sample;
 
   this.sampleDepth =
-    this.colorType === 0 ? 1
-    : this.colorType === 2 ? 3
-    : this.colorType === 3 ? 1
-    : this.colorType === 4 ? 2
-    : this.colorType === 6 ? 4
-    : 1;
+    this.colorType === 0
+      ? 1
+      : this.colorType === 2
+      ? 3
+      : this.colorType === 3
+      ? 1
+      : this.colorType === 4
+      ? 2
+      : this.colorType === 6
+      ? 4
+      : 1;
   this.bitsPerPixel = this.bitDepth * this.sampleDepth;
   this.bytesPerPixel = Math.ceil(this.bitsPerPixel / 8);
-  this.wastedBits = ((this.width * this.bitsPerPixel) / 8) - ((this.width * this.bitsPerPixel / 8) | 0);
+  this.wastedBits =
+    (this.width * this.bitsPerPixel) / 8 - (((this.width * this.bitsPerPixel) / 8) | 0);
   this.byteWidth = Math.ceil(this.width * (this.bitsPerPixel / 8));
 
-  this.shiftStart = ((this.bitDepth + (8 / this.bitDepth - this.bitDepth)) - 1) | 0;
+  this.shiftStart = (this.bitDepth + (8 / this.bitDepth - this.bitDepth) - 1) | 0;
   this.shiftMult = this.bitDepth >= 8 ? 0 : this.bitDepth;
   this.mask = this.bitDepth === 32 ? 0xffffffff : (1 << this.bitDepth) - 1;
 
@@ -332,7 +357,7 @@ PNG.prototype.parseLines = function(data) {
   return pixels;
 };
 
-PNG.prototype.unfilterLine = function(filter, line, prior) {
+PNG.prototype.unfilterLine = function (filter, line, prior) {
   for (var x = 0; x < line.length; x++) {
     if (filter === 0) {
       break;
@@ -349,15 +374,15 @@ PNG.prototype.unfilterLine = function(filter, line, prior) {
   return line;
 };
 
-PNG.prototype.sampleLine = function(line, width) {
-  var samples = []
-    , x = 0
-    , pendingSamples
-    , ch
-    , i
-    , sample
-    , shiftStart
-    , toShift;
+PNG.prototype.sampleLine = function (line, width) {
+  var samples = [],
+    x = 0,
+    pendingSamples,
+    ch,
+    i,
+    sample,
+    shiftStart,
+    toShift;
 
   while (x < line.length) {
     pendingSamples = this.sampleDepth;
@@ -370,19 +395,20 @@ PNG.prototype.sampleLine = function(line, width) {
       } else if (this.bitDepth === 32) {
         ch = (ch << 24) | (line[++x] << 16) | (line[++x] << 8) | line[++x];
       } else if (this.bitDepth > 32) {
-        throw new Error('bitDepth ' + this.bitDepth + ' unsupported.');
+        throw new Error("bitDepth " + this.bitDepth + " unsupported.");
       }
       shiftStart = this.shiftStart;
       toShift = shiftStart - (x === line.length - 1 ? this.wastedBits : 0);
       for (i = 0; i <= toShift; i++) {
         sample = (ch >> (this.shiftMult * shiftStart)) & this.mask;
         if (this.colorType !== 3) {
-          if (this.bitDepth < 8) { // <= 8 would work too, doesn't matter
+          if (this.bitDepth < 8) {
+            // <= 8 would work too, doesn't matter
             // sample = sample * (0xff / this.mask) | 0; // would work too
             sample *= 0xff / this.mask;
             sample |= 0;
           } else if (this.bitDepth > 8) {
-            sample = (sample / this.mask) * 255 | 0;
+            sample = ((sample / this.mask) * 255) | 0;
           }
         }
         samples.push(sample);
@@ -412,27 +438,26 @@ PNG.prototype.filters = {
   average: function Average(x, line, prior, bpp) {
     if (x < bpp) return Math.floor((prior[x] || 0) / 2);
     // if (x < bpp) return (prior[x] || 0) >> 1;
-    return (line[x]
-      + Math.floor((line[x - bpp] + prior[x]) / 2)
+    return (
+      (line[x] + Math.floor((line[x - bpp] + prior[x]) / 2)) %
       // + ((line[x - bpp] + prior[x]) >> 1)
-    ) % 256;
+      256
+    );
   },
   paeth: function Paeth(x, line, prior, bpp) {
     if (x < bpp) return prior[x] || 0;
-    return (line[x] + this._predictor(
-      line[x - bpp], prior[x] || 0, prior[x - bpp] || 0
-    )) % 256;
+    return (line[x] + this._predictor(line[x - bpp], prior[x] || 0, prior[x - bpp] || 0)) % 256;
   },
   _predictor: function PaethPredictor(a, b, c) {
     // a = left, b = above, c = upper left
-    var p = a + b - c
-      , pa = Math.abs(p - a)
-      , pb = Math.abs(p - b)
-      , pc = Math.abs(p - c);
+    var p = a + b - c,
+      pa = Math.abs(p - a),
+      pb = Math.abs(p - b),
+      pc = Math.abs(p - c);
     if (pa <= pb && pa <= pc) return a;
     if (pb <= pc) return b;
     return c;
-  }
+  },
 };
 
 /**
@@ -462,31 +487,31 @@ PNG.prototype.filters = {
  * SOFTWARE.
  */
 
-PNG.prototype.sampleInterlacedLines = function(raw) {
-  var psize
-    , vpr
-    , samples
-    , source_offset
-    , i
-    , pass
-    , xstart
-    , ystart
-    , xstep
-    , ystep
-    , recon
-    , ppr
-    , row_size
-    , y
-    , filter_type
-    , scanline
-    , flat
-    , offset
-    , k
-    , end_offset
-    , skip
-    , j
-    , k
-    , f;
+PNG.prototype.sampleInterlacedLines = function (raw) {
+  var psize,
+    vpr,
+    samples,
+    source_offset,
+    i,
+    pass,
+    xstart,
+    ystart,
+    xstep,
+    ystep,
+    recon,
+    ppr,
+    row_size,
+    y,
+    filter_type,
+    scanline,
+    flat,
+    offset,
+    k,
+    end_offset,
+    skip,
+    j,
+    k,
+    f;
 
   var adam7 = [
     [0, 0, 8, 8],
@@ -495,7 +520,7 @@ PNG.prototype.sampleInterlacedLines = function(raw) {
     [2, 0, 4, 4],
     [0, 2, 2, 4],
     [1, 0, 2, 2],
-    [0, 1, 1, 2]
+    [0, 1, 1, 2],
   ];
 
   // Fractional bytes per pixel
@@ -557,29 +582,29 @@ PNG.prototype.sampleInterlacedLines = function(raw) {
   return samples;
 };
 
-PNG.prototype.createBitmap = function(pixels) {
-  var bmp = []
-    , i;
+PNG.prototype.createBitmap = function (pixels) {
+  var bmp = [],
+    i;
 
   if (this.colorType === 0) {
-    pixels = pixels.map(function(sample) {
+    pixels = pixels.map(function (sample) {
       return { r: sample[0], g: sample[0], b: sample[0], a: 255 };
     });
   } else if (this.colorType === 2) {
-    pixels = pixels.map(function(sample) {
+    pixels = pixels.map(function (sample) {
       return { r: sample[0], g: sample[1], b: sample[2], a: 255 };
     });
   } else if (this.colorType === 3) {
-    pixels = pixels.map(function(sample) {
-      if (!this.palette[sample[0]]) throw new Error('bad palette index');
+    pixels = pixels.map(function (sample) {
+      if (!this.palette[sample[0]]) throw new Error("bad palette index");
       return this.palette[sample[0]];
     }, this);
   } else if (this.colorType === 4) {
-    pixels = pixels.map(function(sample) {
+    pixels = pixels.map(function (sample) {
       return { r: sample[0], g: sample[0], b: sample[0], a: sample[1] };
     });
   } else if (this.colorType === 6) {
-    pixels = pixels.map(function(sample) {
+    pixels = pixels.map(function (sample) {
       return { r: sample[0], g: sample[1], b: sample[2], a: sample[3] };
     });
   }
@@ -591,23 +616,23 @@ PNG.prototype.createBitmap = function(pixels) {
   return bmp;
 };
 
-PNG.prototype.createCellmap = function(bmp, options) {
-  var bmp = bmp || this.bmp
-    , options = options || this.options
-    , cellmap = []
-    , scale = options.scale || 0.20
-    , height = bmp.length
-    , width = bmp[0].length
-    , cmwidth = options.width
-    , cmheight = options.height
-    , line
-    , x
-    , y
-    , xx
-    , yy
-    , scale
-    , xs
-    , ys;
+PNG.prototype.createCellmap = function (bmp, options) {
+  var bmp = bmp || this.bmp,
+    options = options || this.options,
+    cellmap = [],
+    scale = options.scale || 0.2,
+    height = bmp.length,
+    width = bmp[0].length,
+    cmwidth = options.width,
+    cmheight = options.height,
+    line,
+    x,
+    y,
+    xx,
+    yy,
+    scale,
+    xs,
+    ys;
 
   if (cmwidth) {
     scale = cmwidth / width;
@@ -641,31 +666,31 @@ PNG.prototype.createCellmap = function(bmp, options) {
   return cellmap;
 };
 
-PNG.prototype.renderANSI = function(bmp) {
-  var self = this
-    , out = '';
+PNG.prototype.renderANSI = function (bmp) {
+  var self = this,
+    out = "";
 
-  bmp.forEach(function(line, y) {
-    line.forEach(function(pixel, x) {
+  bmp.forEach(function (line, y) {
+    line.forEach(function (pixel, x) {
       var outch = self.getOutch(x, y, line, pixel);
       out += self.pixelToSGR(pixel, outch);
     });
-    out += '\n';
+    out += "\n";
   });
 
   return out;
 };
 
-PNG.prototype.renderContent = function(bmp, el) {
-  var self = this
-    , out = '';
+PNG.prototype.renderContent = function (bmp, el) {
+  var self = this,
+    out = "";
 
-  bmp.forEach(function(line, y) {
-    line.forEach(function(pixel, x) {
+  bmp.forEach(function (line, y) {
+    line.forEach(function (pixel, x) {
       var outch = self.getOutch(x, y, line, pixel);
       out += self.pixelToTags(pixel, outch);
     });
-    out += '\n';
+    out += "\n";
   });
 
   el.setContent(out);
@@ -673,23 +698,23 @@ PNG.prototype.renderContent = function(bmp, el) {
   return out;
 };
 
-PNG.prototype.renderScreen = function(bmp, screen, xi, xl, yi, yl) {
-  var self = this
-    , lines = screen.lines
-    , cellLines
-    , y
-    , yy
-    , x
-    , xx
-    , alpha
-    , attr
-    , ch;
+PNG.prototype.renderScreen = function (bmp, screen, xi, xl, yi, yl) {
+  var self = this,
+    lines = screen.lines,
+    cellLines,
+    y,
+    yy,
+    x,
+    xx,
+    alpha,
+    attr,
+    ch;
 
-  cellLines = bmp.reduce(function(cellLines, line, y) {
+  cellLines = bmp.reduce(function (cellLines, line, y) {
     var cellLine = [];
-    line.forEach(function(pixel, x) {
-      var outch = self.getOutch(x, y, line, pixel)
-        , cell = self.pixelToCell(pixel, outch);
+    line.forEach(function (pixel, x) {
+      var outch = self.getOutch(x, y, line, pixel),
+        cell = self.pixelToCell(pixel, outch);
       cellLine.push(cell);
     });
     cellLines.push(cellLine);
@@ -711,7 +736,7 @@ PNG.prototype.renderScreen = function(bmp, screen, xi, xl, yi, yl) {
           attr = cellLines[yy][xx][0];
           ch = cellLines[yy][xx][1];
           lines[y][x][0] = this.colors.blend(lines[y][x][0], attr, alpha);
-          if (ch !== ' ') lines[y][x][1] = ch;
+          if (ch !== " ") lines[y][x][1] = ch;
           lines[y].dirty = true;
           continue;
         }
@@ -723,88 +748,82 @@ PNG.prototype.renderScreen = function(bmp, screen, xi, xl, yi, yl) {
   }
 };
 
-PNG.prototype.renderElement = function(bmp, el) {
-  var xi = el.aleft + el.ileft
-    , xl = el.aleft + el.width - el.iright
-    , yi = el.atop + el.itop
-    , yl = el.atop + el.height - el.ibottom;
+PNG.prototype.renderElement = function (bmp, el) {
+  var xi = el.aleft + el.ileft,
+    xl = el.aleft + el.width - el.iright,
+    yi = el.atop + el.itop,
+    yl = el.atop + el.height - el.ibottom;
 
   return this.renderScreen(bmp, el.screen, xi, xl, yi, yl);
 };
 
-PNG.prototype.pixelToSGR = function(pixel, ch) {
-  var bga = 1.0
-    , fga = 0.5
-    , a = pixel.a / 255
-    , bg
-    , fg;
+PNG.prototype.pixelToSGR = function (pixel, ch) {
+  var bga = 1.0,
+    fga = 0.5,
+    a = pixel.a / 255,
+    bg,
+    fg;
 
-  bg = this.colors.match(
-    pixel.r * a * bga | 0,
-    pixel.g * a * bga | 0,
-    pixel.b * a * bga | 0);
+  bg = this.colors.match((pixel.r * a * bga) | 0, (pixel.g * a * bga) | 0, (pixel.b * a * bga) | 0);
 
   if (ch && this.options.ascii) {
     fg = this.colors.match(
-      pixel.r * a * fga | 0,
-      pixel.g * a * fga | 0,
-      pixel.b * a * fga | 0);
+      (pixel.r * a * fga) | 0,
+      (pixel.g * a * fga) | 0,
+      (pixel.b * a * fga) | 0,
+    );
     if (a === 0) {
-      return '\x1b[38;5;' + fg + 'm' + ch + '\x1b[m';
+      return "\x1b[38;5;" + fg + "m" + ch + "\x1b[m";
     }
-    return '\x1b[38;5;' + fg + 'm\x1b[48;5;' + bg + 'm' + ch + '\x1b[m';
+    return "\x1b[38;5;" + fg + "m\x1b[48;5;" + bg + "m" + ch + "\x1b[m";
   }
 
-  if (a === 0) return ' ';
+  if (a === 0) return " ";
 
-  return '\x1b[48;5;' + bg + 'm \x1b[m';
+  return "\x1b[48;5;" + bg + "m \x1b[m";
 };
 
-PNG.prototype.pixelToTags = function(pixel, ch) {
-  var bga = 1.0
-    , fga = 0.5
-    , a = pixel.a / 255
-    , bg
-    , fg;
+PNG.prototype.pixelToTags = function (pixel, ch) {
+  var bga = 1.0,
+    fga = 0.5,
+    a = pixel.a / 255,
+    bg,
+    fg;
 
   bg = this.colors.RGBtoHex(
-    pixel.r * a * bga | 0,
-    pixel.g * a * bga | 0,
-    pixel.b * a * bga | 0);
+    (pixel.r * a * bga) | 0,
+    (pixel.g * a * bga) | 0,
+    (pixel.b * a * bga) | 0,
+  );
 
   if (ch && this.options.ascii) {
     fg = this.colors.RGBtoHex(
-      pixel.r * a * fga | 0,
-      pixel.g * a * fga | 0,
-      pixel.b * a * fga | 0);
+      (pixel.r * a * fga) | 0,
+      (pixel.g * a * fga) | 0,
+      (pixel.b * a * fga) | 0,
+    );
     if (a === 0) {
-      return '{' + fg + '-fg}' + ch + '{/}';
+      return "{" + fg + "-fg}" + ch + "{/}";
     }
-    return '{' + fg + '-fg}{' + bg + '-bg}' + ch + '{/}';
+    return "{" + fg + "-fg}{" + bg + "-bg}" + ch + "{/}";
   }
 
-  if (a === 0) return ' ';
+  if (a === 0) return " ";
 
-  return '{' + bg + '-bg} {/' + bg + '-bg}';
+  return "{" + bg + "-bg} {/" + bg + "-bg}";
 };
 
-PNG.prototype.pixelToCell = function(pixel, ch) {
-  var bga = 1.0
-    , fga = 0.5
-    , a = pixel.a / 255
-    , bg
-    , fg;
+PNG.prototype.pixelToCell = function (pixel, ch) {
+  var bga = 1.0,
+    fga = 0.5,
+    a = pixel.a / 255,
+    bg,
+    fg;
 
-  bg = this.colors.match(
-    pixel.r * bga | 0,
-    pixel.g * bga | 0,
-    pixel.b * bga | 0);
+  bg = this.colors.match((pixel.r * bga) | 0, (pixel.g * bga) | 0, (pixel.b * bga) | 0);
 
   if (ch && this.options.ascii) {
-    fg = this.colors.match(
-      pixel.r * fga | 0,
-      pixel.g * fga | 0,
-      pixel.b * fga | 0);
+    fg = this.colors.match((pixel.r * fga) | 0, (pixel.g * fga) | 0, (pixel.b * fga) | 0);
   } else {
     fg = 0x1ff;
     ch = null;
@@ -812,94 +831,94 @@ PNG.prototype.pixelToCell = function(pixel, ch) {
 
   // if (a === 0) bg = 0x1ff;
 
-  return [(0 << 18) | (fg << 9) | (bg << 0), ch || ' ', a];
+  return [(0 << 18) | (fg << 9) | (bg << 0), ch || " ", a];
 };
 
 // Taken from libcaca:
-PNG.prototype.getOutch = (function() {
-  var dchars = '????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i\'.`,  `.        ';
+PNG.prototype.getOutch = (function () {
+  var dchars = "????8@8@#8@8##8#MKXWwz$&%x><\\/xo;+=|^-:i'.`,  `.        ";
 
-  var luminance = function(pixel) {
-    var a = pixel.a / 255
-      , r = pixel.r * a
-      , g = pixel.g * a
-      , b = pixel.b * a
-      , l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  var luminance = function (pixel) {
+    var a = pixel.a / 255,
+      r = pixel.r * a,
+      g = pixel.g * a,
+      b = pixel.b * a,
+      l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
     return l / 255;
   };
 
-  return function(x, y, line, pixel) {
-    var lumi = luminance(pixel)
-      , outch = dchars[lumi * (dchars.length - 1) | 0];
+  return function (x, y, line, pixel) {
+    var lumi = luminance(pixel),
+      outch = dchars[(lumi * (dchars.length - 1)) | 0];
 
     return outch;
   };
 })();
 
-PNG.prototype.compileFrames = function(frames) {
-  return this.optimization === 'mem'
+PNG.prototype.compileFrames = function (frames) {
+  return this.optimization === "mem"
     ? this.compileFrames_lomem(frames)
     : this.compileFrames_locpu(frames);
 };
 
-PNG.prototype.compileFrames_lomem = function(frames) {
+PNG.prototype.compileFrames_lomem = function (frames) {
   if (!this.actl) return;
-  return frames.map(function(frame, i) {
+  return frames.map(function (frame, i) {
     this.width = frame.fctl.width;
     this.height = frame.fctl.height;
 
-    var pixels = frame._pixels || this.parseLines(frame.fdat)
-      , bmp = frame._bmp || this.createBitmap(pixels)
-      , fc = frame.fctl;
+    var pixels = frame._pixels || this.parseLines(frame.fdat),
+      bmp = frame._bmp || this.createBitmap(pixels),
+      fc = frame.fctl;
 
     return {
       actl: this.actl,
       fctl: frame.fctl,
-      delay: (fc.delayNum / (fc.delayDen || 100)) * 1000 | 0,
-      bmp: bmp
+      delay: ((fc.delayNum / (fc.delayDen || 100)) * 1000) | 0,
+      bmp: bmp,
     };
   }, this);
 };
 
-PNG.prototype.compileFrames_locpu = function(frames) {
+PNG.prototype.compileFrames_locpu = function (frames) {
   if (!this.actl) return;
 
   this._curBmp = null;
   this._lastBmp = null;
 
-  return frames.map(function(frame, i) {
+  return frames.map(function (frame, i) {
     this.width = frame.fctl.width;
     this.height = frame.fctl.height;
 
-    var pixels = frame._pixels || this.parseLines(frame.fdat)
-      , bmp = frame._bmp || this.createBitmap(pixels)
-      , renderBmp = this.renderFrame(bmp, frame, i)
-      , cellmap = this.createCellmap(renderBmp)
-      , fc = frame.fctl;
+    var pixels = frame._pixels || this.parseLines(frame.fdat),
+      bmp = frame._bmp || this.createBitmap(pixels),
+      renderBmp = this.renderFrame(bmp, frame, i),
+      cellmap = this.createCellmap(renderBmp),
+      fc = frame.fctl;
 
     return {
       actl: this.actl,
       fctl: frame.fctl,
-      delay: (fc.delayNum / (fc.delayDen || 100)) * 1000 | 0,
+      delay: ((fc.delayNum / (fc.delayDen || 100)) * 1000) | 0,
       bmp: renderBmp,
-      cellmap: cellmap
+      cellmap: cellmap,
     };
   }, this);
 };
 
-PNG.prototype.renderFrame = function(bmp, frame, i) {
-  var first = this.frames[0]
-    , last = this.frames[i - 1]
-    , fc = frame.fctl
-    , xo = fc.xOffset
-    , yo = fc.yOffset
-    , lxo
-    , lyo
-    , x
-    , y
-    , line
-    , p;
+PNG.prototype.renderFrame = function (bmp, frame, i) {
+  var first = this.frames[0],
+    last = this.frames[i - 1],
+    fc = frame.fctl,
+    xo = fc.xOffset,
+    yo = fc.yOffset,
+    lxo,
+    lyo,
+    x,
+    y,
+    line,
+    p;
 
   if (!this._curBmp) {
     this._curBmp = [];
@@ -964,20 +983,20 @@ PNG.prototype.renderFrame = function(bmp, frame, i) {
   return this._curBmp;
 };
 
-PNG.prototype._animate = function(callback) {
+PNG.prototype._animate = function (callback) {
   if (!this.frames) {
     return callback(this.bmp, this.cellmap);
   }
 
-  var self = this
-    , numPlays = this.actl.numPlays || Infinity
-    , running = 0
-    , i = -1;
+  var self = this,
+    numPlays = this.actl.numPlays || Infinity,
+    running = 0,
+    i = -1;
 
   this._curBmp = null;
   this._lastBmp = null;
 
-  var next_lomem = function() {
+  var next_lomem = function () {
     if (!running) return;
 
     var frame = self.frames[++i];
@@ -990,15 +1009,15 @@ PNG.prototype._animate = function(callback) {
       return setImmediate(next);
     }
 
-    var bmp = frame.bmp
-      , renderBmp = self.renderFrame(bmp, frame, i)
-      , cellmap = self.createCellmap(renderBmp);
+    var bmp = frame.bmp,
+      renderBmp = self.renderFrame(bmp, frame, i),
+      cellmap = self.createCellmap(renderBmp);
 
     callback(renderBmp, cellmap);
-    return setTimeout(next, frame.delay / self.speed | 0);
+    return setTimeout(next, (frame.delay / self.speed) | 0);
   };
 
-  var next_locpu = function() {
+  var next_locpu = function () {
     if (!running) return;
     var frame = self.frames[++i];
     if (!frame) {
@@ -1007,21 +1026,21 @@ PNG.prototype._animate = function(callback) {
       return setImmediate(next);
     }
     callback(frame.bmp, frame.cellmap);
-    return setTimeout(next, frame.delay / self.speed | 0);
+    return setTimeout(next, (frame.delay / self.speed) | 0);
   };
 
-  var next = this.optimization === 'mem'
-    ? next_lomem
-    : next_locpu;
+  var next = this.optimization === "mem" ? next_lomem : next_locpu;
 
-  this._control = function(state) {
+  this._control = function (state) {
     if (state === -1) {
       i = -1;
       self._curBmp = null;
       self._lastBmp = null;
       running = 0;
-      callback(self.frames[0].bmp,
-        self.frames[0].cellmap || self.createCellmap(self.frames[0].bmp));
+      callback(
+        self.frames[0].bmp,
+        self.frames[0].cellmap || self.createCellmap(self.frames[0].bmp),
+      );
       return;
     }
     if (state === running) return;
@@ -1032,7 +1051,7 @@ PNG.prototype._animate = function(callback) {
   this._control(1);
 };
 
-PNG.prototype.play = function(callback) {
+PNG.prototype.play = function (callback) {
   if (!this._control || callback) {
     this.stop();
     return this._animate(callback);
@@ -1040,30 +1059,32 @@ PNG.prototype.play = function(callback) {
   this._control(1);
 };
 
-PNG.prototype.pause = function() {
+PNG.prototype.pause = function () {
   if (!this._control) return;
   this._control(0);
 };
 
-PNG.prototype.stop = function() {
+PNG.prototype.stop = function () {
   if (!this._control) return;
   this._control(-1);
 };
 
-PNG.prototype.toPNG = function(input) {
-  var options = this.options
-    , file = this.file
-    , format = this.format
-    , buf
-    , img
-    , gif
-    , i
-    , control
-    , disposeOp;
+PNG.prototype.toPNG = function (input) {
+  var options = this.options,
+    file = this.file,
+    format = this.format,
+    buf,
+    img,
+    gif,
+    i,
+    control,
+    disposeOp;
 
-  if (format !== 'gif') {
-    buf = exec('convert', [format + ':-', 'png:-'],
-      { stdio: ['pipe', 'pipe', 'ignore'], input: input });
+  if (format !== "gif") {
+    buf = exec("convert", [format + ":-", "png:-"], {
+      stdio: ["pipe", "pipe", "ignore"],
+      input: input,
+    });
     img = PNG(buf, options);
     img.file = file;
     return img;
@@ -1092,11 +1113,11 @@ PNG.prototype.toPNG = function(input) {
         delayNum: control.delay,
         delayDen: 100,
         disposeOp: disposeOp,
-        blendOp: 1
+        blendOp: 1,
       },
       fdat: [],
       _pixels: [],
-      _bmp: img.bmp
+      _bmp: img.bmp,
     });
   }
 
@@ -1116,37 +1137,41 @@ PNG.prototype.toPNG = function(input) {
 // Convert a gif to an apng using imagemagick. Unfortunately imagemagick
 // doesn't support apngs, so we coalesce the gif frames into one image and then
 // slice them into frames.
-PNG.prototype.gifMagick = function(input) {
-  var options = this.options
-    , file = this.file
-    , format = this.format
-    , buf
-    , fmt
-    , img
-    , frames
-    , frame
-    , width
-    , height
-    , iwidth
-    , twidth
-    , i
-    , lines
-    , line
-    , x
-    , y;
+PNG.prototype.gifMagick = function (input) {
+  var options = this.options,
+    file = this.file,
+    format = this.format,
+    buf,
+    fmt,
+    img,
+    frames,
+    frame,
+    width,
+    height,
+    iwidth,
+    twidth,
+    i,
+    lines,
+    line,
+    x,
+    y;
 
-  buf = exec('convert',
-    [format + ':-', '-coalesce', '+append', 'png:-'],
-    { stdio: ['pipe', 'pipe', 'ignore'], input: input });
+  buf = exec("convert", [format + ":-", "-coalesce", "+append", "png:-"], {
+    stdio: ["pipe", "pipe", "ignore"],
+    input: input,
+  });
 
-  fmt = '{"W":%W,"H":%H,"w":%w,"h":%h,"d":%T,"x":"%X","y":"%Y"},'
-  frames = exec('identify', ['-format', fmt, format + ':-'],
-    { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'], input: input });
-  frames = JSON.parse('[' + frames.trim().slice(0, -1) + ']');
+  fmt = '{"W":%W,"H":%H,"w":%w,"h":%h,"d":%T,"x":"%X","y":"%Y"},';
+  frames = exec("identify", ["-format", fmt, format + ":-"], {
+    encoding: "utf8",
+    stdio: ["pipe", "pipe", "ignore"],
+    input: input,
+  });
+  frames = JSON.parse("[" + frames.trim().slice(0, -1) + "]");
 
   img = PNG(buf, options);
   img.file = file;
-  Object.keys(img).forEach(function(key) {
+  Object.keys(img).forEach(function (key) {
     this[key] = img[key];
   }, this);
 
@@ -1187,11 +1212,11 @@ PNG.prototype.gifMagick = function(input) {
         delayNum: frame.d,
         delayDen: 100,
         disposeOp: 0,
-        blendOp: 0
+        blendOp: 0,
       },
       fdat: [],
       _pixels: [],
-      _bmp: lines
+      _bmp: lines,
     });
   }
 
@@ -1208,10 +1233,14 @@ PNG.prototype.gifMagick = function(input) {
   return this;
 };
 
-PNG.prototype.decompress = function(buffers) {
-  return zlib.inflateSync(new Buffer(buffers.reduce(function(out, data) {
-    return out.concat(Array.prototype.slice.call(data));
-  }, [])));
+PNG.prototype.decompress = function (buffers) {
+  return zlib.inflateSync(
+    new Buffer(
+      buffers.reduce(function (out, data) {
+        return out.concat(Array.prototype.slice.call(data));
+      }, []),
+    ),
+  );
 };
 
 /**
@@ -1241,53 +1270,42 @@ PNG.prototype.decompress = function(buffers) {
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
+ */
 
-PNG.prototype.crc32 = (function() {
+PNG.prototype.crc32 = (function () {
   var crcTable = [
-    0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
-    0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
-    0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
-    0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7,
-    0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9,
-    0xfa0f3d63, 0x8d080df5, 0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172,
-    0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b, 0x35b5a8fa, 0x42b2986c,
-    0xdbbbc9d6, 0xacbcf940, 0x32d86ce3, 0x45df5c75, 0xdcd60dcf, 0xabd13d59,
-    0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423,
-    0xcfba9599, 0xb8bda50f, 0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924,
-    0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d, 0x76dc4190, 0x01db7106,
-    0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f, 0x9fbfe4a5, 0xe8b8d433,
-    0x7807c9a2, 0x0f00f934, 0x9609a88e, 0xe10e9818, 0x7f6a0dbb, 0x086d3d2d,
-    0x91646c97, 0xe6635c01, 0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e,
-    0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457, 0x65b0d9c6, 0x12b7e950,
-    0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65,
-    0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2, 0x4adfa541, 0x3dd895d7,
-    0xa4d1c46d, 0xd3d6f4fb, 0x4369e96a, 0x346ed9fc, 0xad678846, 0xda60b8d0,
-    0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9, 0x5005713c, 0x270241aa,
-    0xbe0b1010, 0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
-    0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17, 0x2eb40d81,
-    0xb7bd5c3b, 0xc0ba6cad, 0xedb88320, 0x9abfb3b6, 0x03b6e20c, 0x74b1d29a,
-    0xead54739, 0x9dd277af, 0x04db2615, 0x73dc1683, 0xe3630b12, 0x94643b84,
-    0x0d6d6a3e, 0x7a6a5aa8, 0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1,
-    0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb,
-    0x196c3671, 0x6e6b06e7, 0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc,
-    0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5, 0xd6d6a3e8, 0xa1d1937e,
-    0x38d8c2c4, 0x4fdff252, 0xd1bb67f1, 0xa6bc5767, 0x3fb506dd, 0x48b2364b,
-    0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55,
-    0x316e8eef, 0x4669be79, 0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236,
-    0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f, 0xc5ba3bbe, 0xb2bd0b28,
-    0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d,
-    0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x026d930a, 0x9c0906a9, 0xeb0e363f,
-    0x72076785, 0x05005713, 0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38,
-    0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21, 0x86d3d2d4, 0xf1d4e242,
-    0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777,
-    0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c, 0x8f659eff, 0xf862ae69,
-    0x616bffd3, 0x166ccf45, 0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2,
-    0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db, 0xaed16a4a, 0xd9d65adc,
-    0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
-    0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693,
-    0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
-    0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
+    0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
+    0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
+    0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7,
+    0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9, 0xfa0f3d63, 0x8d080df5,
+    0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172, 0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b,
+    0x35b5a8fa, 0x42b2986c, 0xdbbbc9d6, 0xacbcf940, 0x32d86ce3, 0x45df5c75, 0xdcd60dcf, 0xabd13d59,
+    0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423, 0xcfba9599, 0xb8bda50f,
+    0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924, 0x2f6f7c87, 0x58684c11, 0xc1611dab, 0xb6662d3d,
+    0x76dc4190, 0x01db7106, 0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f, 0x9fbfe4a5, 0xe8b8d433,
+    0x7807c9a2, 0x0f00f934, 0x9609a88e, 0xe10e9818, 0x7f6a0dbb, 0x086d3d2d, 0x91646c97, 0xe6635c01,
+    0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e, 0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457,
+    0x65b0d9c6, 0x12b7e950, 0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65,
+    0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2, 0x4adfa541, 0x3dd895d7, 0xa4d1c46d, 0xd3d6f4fb,
+    0x4369e96a, 0x346ed9fc, 0xad678846, 0xda60b8d0, 0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9,
+    0x5005713c, 0x270241aa, 0xbe0b1010, 0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f,
+    0x5edef90e, 0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17, 0x2eb40d81, 0xb7bd5c3b, 0xc0ba6cad,
+    0xedb88320, 0x9abfb3b6, 0x03b6e20c, 0x74b1d29a, 0xead54739, 0x9dd277af, 0x04db2615, 0x73dc1683,
+    0xe3630b12, 0x94643b84, 0x0d6d6a3e, 0x7a6a5aa8, 0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1,
+    0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb, 0x196c3671, 0x6e6b06e7,
+    0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc, 0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5,
+    0xd6d6a3e8, 0xa1d1937e, 0x38d8c2c4, 0x4fdff252, 0xd1bb67f1, 0xa6bc5767, 0x3fb506dd, 0x48b2364b,
+    0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55, 0x316e8eef, 0x4669be79,
+    0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236, 0xcc0c7795, 0xbb0b4703, 0x220216b9, 0x5505262f,
+    0xc5ba3bbe, 0xb2bd0b28, 0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d,
+    0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x026d930a, 0x9c0906a9, 0xeb0e363f, 0x72076785, 0x05005713,
+    0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38, 0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21,
+    0x86d3d2d4, 0xf1d4e242, 0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777,
+    0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c, 0x8f659eff, 0xf862ae69, 0x616bffd3, 0x166ccf45,
+    0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2, 0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db,
+    0xaed16a4a, 0xd9d65adc, 0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9,
+    0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
+    0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d,
   ];
 
   return function crc32(buf) {
@@ -1300,7 +1318,7 @@ PNG.prototype.crc32 = (function() {
   };
 })();
 
-PNG.prototype._debug = function() {
+PNG.prototype._debug = function () {
   if (!this.options.log) return;
   return this.options.log.apply(null, arguments);
 };
@@ -1316,19 +1334,19 @@ function GIF(file, options) {
     return new GIF(file, options);
   }
 
-  var info = {}
-    , p = 0
-    , buf
-    , i
-    , total
-    , sig
-    , desc
-    , img
-    , ext
-    , label
-    , size;
+  var info = {},
+    p = 0,
+    buf,
+    i,
+    total,
+    sig,
+    desc,
+    img,
+    ext,
+    label,
+    size;
 
-  if (!file) throw new Error('no file');
+  if (!file) throw new Error("no file");
 
   options = options || {};
 
@@ -1348,9 +1366,9 @@ function GIF(file, options) {
     buf = fs.readFileSync(file);
   }
 
-  sig = buf.slice(0, 6).toString('ascii');
-  if (sig !== 'GIF87a' && sig !== 'GIF89a') {
-    throw new Error('bad header: ' + sig);
+  sig = buf.slice(0, 6).toString("ascii");
+  if (sig !== "GIF87a" && sig !== "GIF89a") {
+    throw new Error("bad header: " + sig);
   }
 
   this.width = buf.readUInt16LE(6);
@@ -1477,9 +1495,9 @@ function GIF(file, options) {
           // https://wiki.whatwg.org/wiki/GIF#Specifications
           size = buf.readUInt8(p);
           p += 1;
-          ext.id = buf.slice(p, p + 8).toString('ascii');
+          ext.id = buf.slice(p, p + 8).toString("ascii");
           p += 8;
-          ext.auth = buf.slice(p, p + 3).toString('ascii');
+          ext.auth = buf.slice(p, p + 3).toString("ascii");
           p += 3;
           ext.data = [];
           while (buf[p] !== 0x00) {
@@ -1488,17 +1506,19 @@ function GIF(file, options) {
             ext.data.push(buf.slice(p, p + size));
             p += size;
           }
-          ext.data = new Buffer(ext.data.reduce(function(out, data) {
-            return out.concat(Array.prototype.slice.call(data));
-          }, []));
+          ext.data = new Buffer(
+            ext.data.reduce(function (out, data) {
+              return out.concat(Array.prototype.slice.call(data));
+            }, []),
+          );
           // AnimExts looping extension (identical to netscape)
-          if (ext.id === 'ANIMEXTS' && ext.auth === '1.0') {
-            ext.id = 'NETSCAPE';
-            ext.auth = '2.0';
+          if (ext.id === "ANIMEXTS" && ext.auth === "1.0") {
+            ext.id = "NETSCAPE";
+            ext.auth = "2.0";
             ext.animexts = true;
           }
           // Netscape extensions
-          if (ext.id === 'NETSCAPE' && ext.auth === '2.0') {
+          if (ext.id === "NETSCAPE" && ext.auth === "2.0") {
             if (ext.data.readUInt8(0) === 0x01) {
               // Netscape looping extension
               // http://graphcomp.com/info/specs/ani_gif.html
@@ -1510,17 +1530,17 @@ function GIF(file, options) {
             }
           }
           // Adobe XMP extension
-          if (ext.id === 'XMP Data' && ext.auth === 'XMP') {
-            ext.xmp = ext.data.toString('utf8');
+          if (ext.id === "XMP Data" && ext.auth === "XMP") {
+            ext.xmp = ext.data.toString("utf8");
             this.xmp = ext.xmp;
           }
           // ICC extension
-          if (ext.id === 'ICCRGBG1' && ext.auth === '012') {
+          if (ext.id === "ICCRGBG1" && ext.auth === "012") {
             // NOTE: Says size is 4 bytes, not 1? Maybe just buffer size?
             this.icc = ext.data;
           }
           // fractint extension
-          if (ext.id === 'fractint' && /^00[1-7]$/.test(ext.auth)) {
+          if (ext.id === "fractint" && /^00[1-7]$/.test(ext.auth)) {
             // NOTE: Says size is 4 bytes, not 1? Maybe just buffer size?
             // Size: '!\377\013' == [0x00, 0x15, 0xff, 0x0b]
             this.fractint = ext.data;
@@ -1545,7 +1565,7 @@ function GIF(file, options) {
         // } else if (desc === 0x00 && p === buf.length - 1) {
         break;
       } else {
-        throw new Error('unknown block');
+        throw new Error("unknown block");
       }
     }
   } catch (e) {
@@ -1554,123 +1574,127 @@ function GIF(file, options) {
     }
   }
 
-  this.images = this.images.map(function(img, imageIndex) {
-    var control = img.control || this;
+  this.images = this.images
+    .map(function (img, imageIndex) {
+      var control = img.control || this;
 
-    img.lzw = new Buffer(img.lzw.reduce(function(out, data) {
-      return out.concat(Array.prototype.slice.call(data));
-    }, []));
+      img.lzw = new Buffer(
+        img.lzw.reduce(function (out, data) {
+          return out.concat(Array.prototype.slice.call(data));
+        }, []),
+      );
 
-    try {
-      img.data = this.decompress(img.lzw, img.codeSize);
-    } catch (e) {
-      if (options.debug) throw e;
-      return;
-    }
-
-    var interlacing = [
-      [ 0, 8 ],
-      [ 4, 8 ],
-      [ 2, 4 ],
-      [ 1, 2 ],
-      [ 0, 0 ]
-    ];
-
-    var table = img.lcolors || this.colors
-      , row = 0
-      , col = 0
-      , ilp = 0
-      , p = 0
-      , b
-      , idx
-      , i
-      , y
-      , x
-      , line
-      , pixel;
-
-    img.samples = [];
-    // Rewritten version of:
-    // https://github.com/lbv/ka-cs-programs/blob/master/lib/gif-reader.js
-    for (;;) {
-      b = img.data[p++];
-      if (b == null) break;
-      idx = (row * img.width + col) * 4;
-      if (!table[b]) {
-        if (options.debug) throw new Error('bad samples');
-        table[b] = [0, 0, 0, 0];
+      try {
+        img.data = this.decompress(img.lzw, img.codeSize);
+      } catch (e) {
+        if (options.debug) throw e;
+        return;
       }
-      img.samples[idx] = table[b][0];
-      img.samples[idx + 1] = table[b][1];
-      img.samples[idx + 2] = table[b][2];
-      img.samples[idx + 3] = table[b][3];
-      if (control.useTransparent && b === control.transparentColor) {
-        img.samples[idx + 3] = 0;
-      }
-      if (++col >= img.width) {
-        col = 0;
-        if (img.ilace) {
-          row += interlacing[ilp][1];
-          if (row >= img.height) {
-            row = interlacing[++ilp][0];
+
+      var interlacing = [
+        [0, 8],
+        [4, 8],
+        [2, 4],
+        [1, 2],
+        [0, 0],
+      ];
+
+      var table = img.lcolors || this.colors,
+        row = 0,
+        col = 0,
+        ilp = 0,
+        p = 0,
+        b,
+        idx,
+        i,
+        y,
+        x,
+        line,
+        pixel;
+
+      img.samples = [];
+      // Rewritten version of:
+      // https://github.com/lbv/ka-cs-programs/blob/master/lib/gif-reader.js
+      for (;;) {
+        b = img.data[p++];
+        if (b == null) break;
+        idx = (row * img.width + col) * 4;
+        if (!table[b]) {
+          if (options.debug) throw new Error("bad samples");
+          table[b] = [0, 0, 0, 0];
+        }
+        img.samples[idx] = table[b][0];
+        img.samples[idx + 1] = table[b][1];
+        img.samples[idx + 2] = table[b][2];
+        img.samples[idx + 3] = table[b][3];
+        if (control.useTransparent && b === control.transparentColor) {
+          img.samples[idx + 3] = 0;
+        }
+        if (++col >= img.width) {
+          col = 0;
+          if (img.ilace) {
+            row += interlacing[ilp][1];
+            if (row >= img.height) {
+              row = interlacing[++ilp][0];
+            }
+          } else {
+            row++;
           }
-        } else {
-          row++;
         }
       }
-    }
 
-    img.pixels = [];
-    for (i = 0; i < img.samples.length; i += 4) {
-      img.pixels.push(img.samples.slice(i, i + 4));
-    }
-
-    img.bmp = [];
-    for (y = 0, p = 0; y < img.height; y++) {
-      line = [];
-      for (x = 0; x < img.width; x++) {
-        pixel = img.pixels[p++];
-        if (!pixel) {
-          if (options.debug) throw new Error('no pixel');
-          line.push({ r: 0, g: 0, b: 0, a: 0 });
-          continue;
-        }
-        line.push({ r: pixel[0], g: pixel[1], b: pixel[2], a: pixel[3] });
+      img.pixels = [];
+      for (i = 0; i < img.samples.length; i += 4) {
+        img.pixels.push(img.samples.slice(i, i + 4));
       }
-      img.bmp.push(line);
-    }
 
-    return img;
-  }, this).filter(Boolean);
+      img.bmp = [];
+      for (y = 0, p = 0; y < img.height; y++) {
+        line = [];
+        for (x = 0; x < img.width; x++) {
+          pixel = img.pixels[p++];
+          if (!pixel) {
+            if (options.debug) throw new Error("no pixel");
+            line.push({ r: 0, g: 0, b: 0, a: 0 });
+            continue;
+          }
+          line.push({ r: pixel[0], g: pixel[1], b: pixel[2], a: pixel[3] });
+        }
+        img.bmp.push(line);
+      }
+
+      return img;
+    }, this)
+    .filter(Boolean);
 
   if (!this.images.length) {
-    throw new Error('no image data or bad decompress');
+    throw new Error("no image data or bad decompress");
   }
 }
 
 // Rewritten version of:
 // https://github.com/lbv/ka-cs-programs/blob/master/lib/gif-reader.js
-GIF.prototype.decompress = function(input, codeSize) {
-  var bitDepth = codeSize + 1
-    , CC = 1 << codeSize
-    , EOI = CC + 1
-    , stack = []
-    , table = []
-    , ntable = 0
-    , oldCode = null
-    , buffer = 0
-    , nbuffer = 0
-    , p = 0
-    , buf = []
-    , bits
-    , read
-    , ans
-    , n
-    , code
-    , i
-    , K
-    , b
-    , maxElem;
+GIF.prototype.decompress = function (input, codeSize) {
+  var bitDepth = codeSize + 1,
+    CC = 1 << codeSize,
+    EOI = CC + 1,
+    stack = [],
+    table = [],
+    ntable = 0,
+    oldCode = null,
+    buffer = 0,
+    nbuffer = 0,
+    p = 0,
+    buf = [],
+    bits,
+    read,
+    ans,
+    n,
+    code,
+    i,
+    K,
+    b,
+    maxElem;
 
   for (;;) {
     if (stack.length === 0) {
@@ -1717,11 +1741,7 @@ GIF.prototype.decompress = function(input, codeSize) {
         for (i = code; i >= 0; i = table[i][1]) {
           stack.push(table[i][0]);
         }
-        table[ntable++] = [
-          table[code][2],
-          oldCode,
-          table[oldCode][2]
-        ];
+        table[ntable++] = [table[code][2], oldCode, table[oldCode][2]];
       } else {
         K = table[oldCode][2];
         table[ntable++] = [K, oldCode, K];
@@ -1732,7 +1752,7 @@ GIF.prototype.decompress = function(input, codeSize) {
 
       oldCode = code;
       if (ntable === maxElem) {
-        maxElem = 1 << (++bitDepth);
+        maxElem = 1 << ++bitDepth;
         if (bitDepth > 12) bitDepth = 12;
       }
     }

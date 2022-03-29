@@ -1,28 +1,27 @@
-var blessed = require('../')
-  , screen;
+var blessed = require("../"),
+  screen;
 
 screen = blessed.screen({
-  dump: __dirname + '/logs/nested-attr.log',
-  warnings: true
+  dump: __dirname + "/logs/nested-attr.log",
+  warnings: true,
 });
 
 blessed.box({
   parent: screen,
-  left: 'center',
-  top: 'center',
-  width: '80%',
-  height: '80%',
+  left: "center",
+  top: "center",
+  width: "80%",
+  height: "80%",
   style: {
-    bg: 'black',
-    fg: 'yellow'
+    bg: "black",
+    fg: "yellow",
   },
   tags: true,
-  border: 'line',
-  content: '{red-fg}hello {blue-fg}how{/blue-fg}'
-    + ' {yellow-bg}are{/yellow-bg} you?{/red-fg}'
+  border: "line",
+  content: "{red-fg}hello {blue-fg}how{/blue-fg}" + " {yellow-bg}are{/yellow-bg} you?{/red-fg}",
 });
 
-screen.key('q', function() {
+screen.key("q", function () {
   return screen.destroy();
 });
 

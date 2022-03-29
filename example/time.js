@@ -6,23 +6,23 @@
  * https://github.com/chjj/blessed
  */
 
-process.title = 'time.js';
+process.title = "time.js";
 
 var argv = process.argv;
 
-if (~argv.indexOf('-h') || ~argv.indexOf('--help')) {
-  console.log('Options:');
-  console.log('-s - Show seconds.');
-  console.log('-n - No leading zero on hours.');
-  console.log('-d - Show date box.');
-  console.log('--skinny - Skinny text.');
+if (~argv.indexOf("-h") || ~argv.indexOf("--help")) {
+  console.log("Options:");
+  console.log("-s - Show seconds.");
+  console.log("-n - No leading zero on hours.");
+  console.log("-d - Show date box.");
+  console.log("--skinny - Skinny text.");
   return process.exit(0);
 }
 
-var blessed = require('blessed');
+var blessed = require("blessed");
 
 var screen = blessed.screen({
-  autoPadding: true
+  autoPadding: true,
 });
 
 var lastTime;
@@ -31,9 +31,9 @@ var positions = {};
 
 var container = blessed.box({
   parent: screen,
-  top: 'center',
-  left: 'center',
-  width: 'shrink',
+  top: "center",
+  left: "center",
+  width: "shrink",
   height: 9,
   //padding: 2,
   //border: {
@@ -43,10 +43,10 @@ var container = blessed.box({
 });
 
 // Workaround for centering shrunken box.
-container.on('prerender', function() {
+container.on("prerender", function () {
   var lpos = container._getCoords(true);
   if (lpos) {
-    container.rleft = (screen.width - (lpos.xl - lpos.xi)) / 2 | 0;
+    container.rleft = ((screen.width - (lpos.xl - lpos.xi)) / 2) | 0;
   }
 });
 
@@ -56,19 +56,19 @@ var date = blessed.box({
   left: 1,
   //top: '80%',
   //left: 'center',
-  width: 'shrink',
-  height: 'shrink',
+  width: "shrink",
+  height: "shrink",
   border: {
-    type: 'line',
-    fg: 'black'
-  }
+    type: "line",
+    fg: "black",
+  },
 });
 
 date.hide();
 
-var wid = ~argv.indexOf('--skinny') ? 1 : 2;
+var wid = ~argv.indexOf("--skinny") ? 1 : 2;
 // var bch = ' ';
-var bch = '│';
+var bch = "│";
 var inverse = true;
 
 // var bch = '*';
@@ -83,7 +83,7 @@ var inverse = true;
 // in 4, 8, etc.
 
 for (var i = 0; i < 10; i++) {
-  var symbols = positions[i] = {};
+  var symbols = (positions[i] = {});
 
   /**
    * Zero
@@ -94,7 +94,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -105,9 +105,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -118,9 +118,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -131,9 +131,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -144,9 +144,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[0].hide();
@@ -159,19 +159,19 @@ for (var i = 0; i < 10; i++) {
     parent: container,
     top: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
     parent: symbols[1],
     top: 0,
-    left: 'center',
+    left: "center",
     width: 2,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[1].hide();
@@ -185,7 +185,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -196,9 +196,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -209,9 +209,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -222,9 +222,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -235,9 +235,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -248,9 +248,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[2].hide();
@@ -264,7 +264,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -276,9 +276,9 @@ for (var i = 0; i < 10; i++) {
     height: 9,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -289,9 +289,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -302,9 +302,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -315,9 +315,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[3].hide();
@@ -331,7 +331,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -343,9 +343,9 @@ for (var i = 0; i < 10; i++) {
     height: 9,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -356,9 +356,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -369,9 +369,9 @@ for (var i = 0; i < 10; i++) {
     height: 4,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[4].hide();
@@ -385,7 +385,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -396,9 +396,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -409,9 +409,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -422,9 +422,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -435,9 +435,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -448,9 +448,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[5].hide();
@@ -464,7 +464,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -475,9 +475,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -488,9 +488,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -501,9 +501,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -514,9 +514,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -527,9 +527,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[6].hide();
@@ -543,7 +543,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -555,9 +555,9 @@ for (var i = 0; i < 10; i++) {
     height: 9,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -568,9 +568,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[7].hide();
@@ -584,7 +584,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -595,9 +595,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -608,9 +608,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -621,9 +621,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -634,9 +634,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -647,9 +647,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[8].hide();
@@ -663,7 +663,7 @@ for (var i = 0; i < 10; i++) {
     top: 0,
     left: 0,
     width: 10,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
@@ -674,9 +674,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -687,9 +687,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -700,9 +700,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -713,9 +713,9 @@ for (var i = 0; i < 10; i++) {
     width: wid,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
@@ -726,9 +726,9 @@ for (var i = 0; i < 10; i++) {
     height: 1,
     ch: bch,
     style: {
-      fg: 'default',
-      inverse: inverse
-    }
+      fg: "default",
+      inverse: inverse,
+    },
   });
 
   symbols[9].hide();
@@ -737,295 +737,293 @@ for (var i = 0; i < 10; i++) {
    * Colon
    */
 
-  symbols[':'] = blessed.box({
+  symbols[":"] = blessed.box({
     parent: container,
     top: 0,
     left: 0,
     width: 5,
-    height: 9
+    height: 9,
   });
 
   blessed.box({
-    parent: symbols[':'],
+    parent: symbols[":"],
     top: 3,
-    left: 'center',
+    left: "center",
     width: 2,
     height: 1,
     ch: bch,
     style: {
-      fg: 'black',
-      inverse: inverse
-    }
+      fg: "black",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols[':'],
+    parent: symbols[":"],
     top: 6,
-    left: 'center',
+    left: "center",
     width: 2,
     height: 1,
     ch: bch,
     style: {
-      fg: 'black',
-      inverse: inverse
-    }
+      fg: "black",
+      inverse: inverse,
+    },
   });
 
-  symbols[':'].hide();
+  symbols[":"].hide();
 
   /**
    * A
    */
 
-  symbols['a'] = blessed.box({
+  symbols["a"] = blessed.box({
     parent: container,
     top: 2,
     left: 0,
     width: 10,
-    height: 7
+    height: 7,
   });
 
   blessed.box({
-    parent: symbols['a'],
+    parent: symbols["a"],
     top: 0,
     left: 0,
     right: 0,
     height: 1,
     ch: bch,
     style: {
-      fg: 'blue',
-      inverse: inverse
-    }
+      fg: "blue",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['a'],
+    parent: symbols["a"],
     top: 0,
     left: 0,
     bottom: 0,
     width: wid,
     ch: bch,
     style: {
-      fg: 'blue',
-      inverse: inverse
-    }
+      fg: "blue",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['a'],
+    parent: symbols["a"],
     top: 3,
     left: 0,
     right: 0,
     height: 1,
     ch: bch,
     style: {
-      fg: 'blue',
-      inverse: inverse
-    }
+      fg: "blue",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['a'],
+    parent: symbols["a"],
     top: 0,
     right: 0,
     bottom: 0,
     width: wid,
     ch: bch,
     style: {
-      fg: 'blue',
-      inverse: inverse
-    }
+      fg: "blue",
+      inverse: inverse,
+    },
   });
 
-  symbols['a'].hide();
+  symbols["a"].hide();
 
   /**
    * P
    */
 
-  symbols['p'] = blessed.box({
+  symbols["p"] = blessed.box({
     parent: container,
     top: 2,
     left: 0,
     width: 10,
-    height: 7
+    height: 7,
   });
 
   blessed.box({
-    parent: symbols['p'],
+    parent: symbols["p"],
     top: 0,
     left: 0,
     right: 0,
     height: 1,
     ch: bch,
     style: {
-      fg: 'blue',
-      inverse: inverse
-    }
+      fg: "blue",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['p'],
+    parent: symbols["p"],
     top: 0,
     right: 0,
     height: 4,
     width: wid,
     ch: bch,
     style: {
-      fg: 'blue',
-      inverse: inverse
-    }
+      fg: "blue",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['p'],
+    parent: symbols["p"],
     top: 0,
     left: 0,
     bottom: 0,
     width: wid,
     ch: bch,
     style: {
-      fg: 'blue',
-      inverse: inverse
-    }
+      fg: "blue",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['p'],
+    parent: symbols["p"],
     top: 3,
     left: 0,
     right: 0,
     height: 1,
     ch: bch,
     style: {
-      fg: 'blue',
-      inverse: inverse
-    }
+      fg: "blue",
+      inverse: inverse,
+    },
   });
 
-  symbols['p'].hide();
+  symbols["p"].hide();
 
   /**
    * M
    */
 
-  symbols['m'] = blessed.box({
+  symbols["m"] = blessed.box({
     parent: container,
     top: 2,
     left: 0,
     width: 10,
-    height: 7
+    height: 7,
   });
 
   blessed.box({
-    parent: symbols['m'],
+    parent: symbols["m"],
     top: 0,
     left: 0,
     right: 0,
     height: 1,
     ch: bch,
     style: {
-      fg: 'black',
-      inverse: inverse
-    }
+      fg: "black",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['m'],
+    parent: symbols["m"],
     top: 0,
     left: 0,
     bottom: 0,
     width: wid,
     ch: bch,
     style: {
-      fg: 'black',
-      inverse: inverse
-    }
+      fg: "black",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['m'],
+    parent: symbols["m"],
     top: 0,
     right: 0,
     bottom: 0,
     width: wid,
     ch: bch,
     style: {
-      fg: 'black',
-      inverse: inverse
-    }
+      fg: "black",
+      inverse: inverse,
+    },
   });
 
   blessed.box({
-    parent: symbols['m'],
+    parent: symbols["m"],
     top: 0,
     bottom: 0,
-    left: 'center',
+    left: "center",
     width: wid,
     ch: bch,
     style: {
-      fg: 'black',
-      inverse: inverse
-    }
+      fg: "black",
+      inverse: inverse,
+    },
   });
 
-  symbols['m'].hide();
+  symbols["m"].hide();
 }
 
 function updateTime() {
-  var pos = 0
-    , d = new Date
-    , im = 'am'
-    , time
-    , h
-    , m
-    , s;
+  var pos = 0,
+    d = new Date(),
+    im = "am",
+    time,
+    h,
+    m,
+    s;
 
   h = d.getHours();
   if (h >= 12) {
-    im = 'pm';
+    im = "pm";
   }
   if (h > 12) {
     h -= 12;
   }
   if (h === 0) h = 12;
   if (h < 10) {
-    h = '0' + h;
+    h = "0" + h;
   }
 
   m = d.getMinutes();
   if (m < 10) {
-    m = '0' + m;
+    m = "0" + m;
   }
 
   s = d.getSeconds();
   if (s < 10) {
-    s = '0' + s;
+    s = "0" + s;
   }
 
-  time = ~argv.indexOf('-s')
-    ? h + ':' + m + ':' + s + im
-    : h + ':' + m + im;
+  time = ~argv.indexOf("-s") ? h + ":" + m + ":" + s + im : h + ":" + m + im;
 
   if (time === lastTime) return;
   lastTime = time;
 
-  time = time.split('');
+  time = time.split("");
 
-  if (~argv.indexOf('-n')) {
-    if (time[0] === '0') time[0] = ' ';
+  if (~argv.indexOf("-n")) {
+    if (time[0] === "0") time[0] = " ";
   }
 
-  Object.keys(positions).forEach(function(key) {
+  Object.keys(positions).forEach(function (key) {
     var symbols = positions[key];
-    Object.keys(symbols).forEach(function(key) {
+    Object.keys(symbols).forEach(function (key) {
       symbols[key].hide();
     });
   });
 
-  time.forEach(function(ch, i) {
-    var symbols = positions[i]
-      , symbol = symbols[ch];
+  time.forEach(function (ch, i) {
+    var symbols = positions[i],
+      symbol = symbols[ch];
 
     if (!symbol) return;
 
@@ -1035,18 +1033,18 @@ function updateTime() {
     symbol.show();
   });
 
-  if (~argv.indexOf('-d')) {
+  if (~argv.indexOf("-d")) {
     date.show();
-    date.setContent(d.toISOString().replace(/\.\d+/, ''));
+    date.setContent(d.toISOString().replace(/\.\d+/, ""));
   }
 
   screen.render();
 }
 
-setInterval(updateTime, ~argv.indexOf('-s') ? 100 : 950);
+setInterval(updateTime, ~argv.indexOf("-s") ? 100 : 950);
 
 updateTime();
 
-screen.key('q', function() {
+screen.key("q", function () {
   process.exit(0);
 });

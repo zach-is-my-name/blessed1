@@ -1,47 +1,47 @@
-var blessed = require('../')
-  , screen;
+var blessed = require("../"),
+  screen;
 
 screen = blessed.screen({
-  dump: __dirname + '/logs/logger.log',
+  dump: __dirname + "/logs/logger.log",
   smartCSR: true,
   autoPadding: false,
-  warnings: true
+  warnings: true,
 });
 
 var logger = blessed.log({
   parent: screen,
-  top: 'center',
-  left: 'center',
-  width: '50%',
-  height: '50%',
-  border: 'line',
+  top: "center",
+  left: "center",
+  width: "50%",
+  height: "50%",
+  border: "line",
   tags: true,
   keys: true,
   vi: true,
   mouse: true,
   scrollback: 100,
   scrollbar: {
-    ch: ' ',
+    ch: " ",
     track: {
-      bg: 'yellow'
+      bg: "yellow",
     },
     style: {
-      inverse: true
-    }
-  }
+      inverse: true,
+    },
+  },
 });
 
 logger.focus();
 
-setInterval(function() {
-  logger.log('Hello {#0fe1ab-fg}world{/}: {bold}%s{/bold}.', Date.now().toString(36));
-  if (Math.random() < 0.30) {
-    logger.log({foo:{bar:{baz:true}}});
+setInterval(function () {
+  logger.log("Hello {#0fe1ab-fg}world{/}: {bold}%s{/bold}.", Date.now().toString(36));
+  if (Math.random() < 0.3) {
+    logger.log({ foo: { bar: { baz: true } } });
   }
   screen.render();
 }, 1000).unref();
 
-screen.key('q', function() {
+screen.key("q", function () {
   return screen.destroy();
 });
 

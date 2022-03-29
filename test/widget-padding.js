@@ -1,27 +1,27 @@
-var blessed = require('../')
-  , screen;
+var blessed = require("../"),
+  screen;
 
 screen = blessed.screen({
-  dump: __dirname + '/logs/padding.log',
-  warnings: true
+  dump: __dirname + "/logs/padding.log",
+  warnings: true,
 });
 
 blessed.box({
   parent: screen,
-  border: 'line',
+  border: "line",
   style: {
-    bg: 'red',
+    bg: "red",
   },
-  content: 'hello world\nhi',
-  align: 'center',
-  left: 'center',
-  top: 'center',
+  content: "hello world\nhi",
+  align: "center",
+  left: "center",
+  top: "center",
   width: 22,
   height: 10,
-  padding: 2
+  padding: 2,
 });
 
-screen.key('q', function() {
+screen.key("q", function () {
   return screen.destroy();
 });
 

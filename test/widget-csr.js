@@ -1,22 +1,20 @@
-var blessed = require('../')
-  , screen;
+var blessed = require("../"),
+  screen;
 
 screen = blessed.screen({
-  dump: __dirname + '/logs/csr.log',
+  dump: __dirname + "/logs/csr.log",
   smartCSR: true,
-  warnings: true
+  warnings: true,
 });
 
-var lorem = require('fs').readFileSync(__dirname + '/git.diff', 'utf8');
+var lorem = require("fs").readFileSync(__dirname + "/git.diff", "utf8");
 
 var cleanSides = screen.cleanSides;
 function expectClean(value) {
-  screen.cleanSides = function(el) {
+  screen.cleanSides = function (el) {
     var ret = cleanSides.apply(this, arguments);
     if (ret !== value) {
-      throw new Error('Failed. Expected '
-        + value + ' from cleanSides. Got '
-        + ret + '.');
+      throw new Error("Failed. Expected " + value + " from cleanSides. Got " + ret + ".");
     }
     return ret;
   };
@@ -39,18 +37,18 @@ expectClean(false);
 
 var btext = blessed.box({
   parent: screen,
-  left: 'center',
-  top: 'center',
-  width: '80%',
-  height: '80%',
+  left: "center",
+  top: "center",
+  width: "80%",
+  height: "80%",
   style: {
-    bg: 'green'
+    bg: "green",
   },
-  border: 'line',
-  content: 'CSR should still work.'
+  border: "line",
+  content: "CSR should still work.",
 });
 btext._oscroll = btext.scroll;
-btext.scroll = function(offset, always) {
+btext.scroll = function (offset, always) {
   expectClean(true);
   return btext._oscroll(offset, always);
 };
@@ -58,19 +56,19 @@ btext.scroll = function(offset, always) {
 var text = blessed.scrollabletext({
   parent: screen,
   content: lorem,
-  border: 'line',
-  left: 'center',
-  top: 'center',
+  border: "line",
+  left: "center",
+  top: "center",
   draggable: true,
-  width: '50%',
-  height: '50%',
+  width: "50%",
+  height: "50%",
   mouse: true,
   keys: true,
-  vi: true
+  vi: true,
 });
 
 text._oscroll = text.scroll;
-text.scroll = function(offset, always) {
+text.scroll = function (offset, always) {
   var el = this;
   var value = true;
   if (el.left < 0) value = true;
@@ -83,7 +81,7 @@ text.scroll = function(offset, always) {
 
 text.focus();
 
-screen.key('q', function() {
+screen.key("q", function () {
   return screen.destroy();
 });
 
