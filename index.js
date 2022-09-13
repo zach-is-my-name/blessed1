@@ -21,7 +21,7 @@ var box = blessed.box({
   left: 'center',
   width: '50%',
   height: '50%',
-  content: phrase4,
+  content: link4,
   tags: true,
 });
 
