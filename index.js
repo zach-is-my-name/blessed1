@@ -1,10 +1,12 @@
 var blessed = require('blessed');
+const {db} = require('./db.js')
 // const chalk = require('chalk')
 
 // Create a screen object.
 var screen = blessed.screen({
   smartCSR: true
 });
+
 
 screen.title = 'my window title';
 const link = `\x1B]8;;https://blog.ethereum.org/2022/08/24/mainnet-merge-announcement\u0007Merge announcement\x1b]8;;\u0007` 
@@ -17,11 +19,11 @@ const phrase4 = '{bold}test{/bold}'
 const link4 ="\u001b]8;;http://example.com/,\u0007Example.com\u001b]8;;\u0007"
 // Create a box perfectly centered horizontally and vertically.
 var box = blessed.box({
-  top: 'center',
+  //top: 'center',
   left: 'center',
-  width: '50%',
-  height: '50%',
-  content: phrase4,
+  width: '100%',
+  height: '100%',
+  content: phrase,
   tags: true,
 });
 
