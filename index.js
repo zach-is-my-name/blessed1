@@ -23,7 +23,7 @@ var box = blessed.box({
   left: 'center',
   width: '100%',
   height: '100%',
-  content: phrase,
+  content: phrase4,
   tags: true,
 });
 
