@@ -12,10 +12,6 @@
   "types": "./typings/index.d.ts",
   "preferGlobal": false,
   "repository": "git://github.com/zach-is-my-name/stressed.git",
-  "homepage": "https://github.com/BioforestChain/blessed",
-  "bugs": {
-    "url": "http://github.com/BioforestChain/blessed/issues"
-  },
   "keywords": [
     "curses",
     "tui",
@@ -32,10 +28,5 @@
   ],
   "engines": {
     "node": ">= 0.8.0"
-  },
-  "browserify": {
-    "transform": [
-      "./browser/transform.js"
-    ]
   }
 }
