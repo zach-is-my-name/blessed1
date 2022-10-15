@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "blessed": "https://github.com/zach-is-my-name/stressed.git"
+    "blessed": "https://github.com/zach-is-my-name/stressed#bbca019"
   }
 }
