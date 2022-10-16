@@ -16,7 +16,7 @@ const phrase = '\u001b[1mtest string\u001b[22m'
 const phrase2 = '\u001b[1msuppppppppppppppppppppppppper looooooooooooong test string\u001b[22m'
 const phrase3 =  '\u001b[1mabc\u001b[22m'
 const phrase4 = '{bold}test{/bold}a'
-const link4 ="\u001b]8;;http://example.com/,\u0007Example.com\u001b]8;;\u0007"
+const link4 ="\x1B]8;;http://example.com/,\u0007Example.com\x1B]8;;\u0007"
 // Create a box perfectly centered horizontally and vertically.
 var box = blessed.box({
   //top: 'center',
